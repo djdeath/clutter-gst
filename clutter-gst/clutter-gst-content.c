@@ -561,8 +561,8 @@ clutter_gst_content_class_init (ClutterGstContentClass *klass)
 
   props[PROP_PAINT_FRAME] =
     g_param_spec_boolean ("paint-frame",
-                          "Paint Video Overlays",
-                          "Paint Video Overlays",
+                          "Paint Frame",
+                          "Paint Frame",
                           TRUE,
                           G_PARAM_STATIC_STRINGS | G_PARAM_READWRITE);
 

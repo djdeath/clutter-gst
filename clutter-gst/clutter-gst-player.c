@@ -114,10 +114,10 @@ clutter_gst_player_default_init (ClutterGstPlayerIface *iface)
   /**
    * ClutterGstPlayer::new-frame:
    * @player: the #ClutterGstPlayer instance that received the signal
-   * @frame: the #ClutterGstFrame newly receive from the video sink
+   * @frame: the #ClutterGstFrame newly received from the video sink
    *
-   * The ::ready signal is emitted each time the gstreamer pipeline
-   * becomes ready.
+   * The ::new-frame signal is emitted each time a frame is received
+   * from the video sink.
    */
   signals[NEW_FRAME] =
     g_signal_new ("new-frame",
@@ -180,8 +180,8 @@ clutter_gst_player_default_init (ClutterGstPlayerIface *iface)
    * @width: new width of the frames
    * @height: new height of the frames
    *
-   * The ::size-change signal is emitted each time the gstreamer pipeline
-   * becomes ready.
+   * The ::size-change signal is emitted each time the new frame
+   * has different dimensions to the previous frame.
    */
   signals[SIZE_CHANGE] =
     g_signal_new ("size-change",

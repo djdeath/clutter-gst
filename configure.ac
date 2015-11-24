@@ -225,7 +225,7 @@ AS_IF([test "$enable_udev" != "no"],
                             AC_DEFINE([HAVE_GUDEV], [1],
                                       ["Defined if gudev is available"])
                           ],[
-                            AS_IF([test "$with_udev" = "yes"],
+                            AS_IF([test "$enable_udev" = "yes"],
                                   [AC_MSG_ERROR([Could not find libgudev])],
                                   [have_gudev=no])
                           ])

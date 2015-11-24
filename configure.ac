@@ -209,13 +209,30 @@ AS_IF([test "x$have_cogl_osx" = xyes],
         AC_SUBST([GL_LDFLAGS])
       ])
 
-PKG_CHECK_MODULES(GUDEV,
-                 [gudev-1.0],
-                 [
-                   have_gudev=yes
-                   AC_DEFINE([HAVE_GUDEV], [1],
-                             ["Defined if gudev is available"])
-                 ],[ have_gudev=no ])
+m4_define([udev_default], auto)
+AC_ARG_ENABLE([udev],
+              [AS_HELP_STRING([--enable-udev],
+                              [Enable camera listing through libgudev @<:@default=]udev_default[@:>@])],
+              [],
+              [enable_udev=udev_default])
+
+AS_IF([test "$enable_udev" != "no"],
+      [
+        PKG_CHECK_MODULES(GUDEV,
+                          [gudev-1.0],
+                          [
+                            have_gudev=yes
+                            AC_DEFINE([HAVE_GUDEV], [1],
+                                      ["Defined if gudev is available"])
+                          ],[
+                            AS_IF([test "$with_udev" = "yes"],
+                                  [AC_MSG_ERROR([Could not find libgudev])],
+                                  [have_gudev=no])
+                          ])
+      ],
+      [
+        have_gudev=no
+      ])
 
 dnl ========================================================================
 dnl Experimental support for hardware accelerated decoders.

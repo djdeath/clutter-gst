@@ -625,6 +625,7 @@ clutter_gst_content_new (void)
 
 /**
  * clutter_gst_content_new_with_sink:
+ * @sink: A #ClutterGstVideoSink
  *
  * Returns: (transfer full): a new #ClutterGstContent instance
  *

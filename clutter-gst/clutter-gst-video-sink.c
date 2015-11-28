@@ -2549,7 +2549,7 @@ clutter_gst_video_sink_is_ready (ClutterGstVideoSink *sink)
  * frame of the given video sink. An application is free to make a
  * copy of this pipeline and modify it for custom rendering.
  *
- * Return value: (transfer none): A #ClutterGstFame or NULL if there
+ * Return value: (transfer none): A #ClutterGstFrame or NULL if there
  *   isn't a frame to be displayed yet.
  *
  * Since: 3.0

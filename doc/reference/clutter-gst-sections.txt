@@ -1,30 +1,26 @@
 <SECTION>
 <FILE>clutter-gst-types</FILE>
-<TITLE>ClutterGstTypes</TITLE>
-ClutterGstSeekFlags
+<TITLE>Types</TITLE>
 ClutterGstBufferingMode
+ClutterGstSeekFlags
+ClutterGstBox
+clutter_gst_box_get_width
+clutter_gst_box_get_height
+ClutterGstFrame
+ClutterGstOverlay
+ClutterGstOverlays
+ClutterGstVideoResolution
 <SUBSECTION Standard>
 clutter_gst_seek_flags_get_type
 CLUTTER_GST_TYPE_SEEK_FLAGS
 clutter_gst_buffering_mode_get_type
 CLUTTER_GST_TYPE_BUFFERING_MODE
-<SUBSECTION Standard>
-ClutterGstBox
-clutter_gst_box_get_width
-clutter_gst_box_get_height
 clutter_gst_box_get_type
 CLUTTER_GST_TYPE_BOX
-<SUBSECTION Standard>
-ClutterGstFrame
 clutter_gst_frame_get_type
 CLUTTER_GST_TYPE_FRAME
-ClutterGstVideoResolution
-</SECTION>
-<SUBSECTION Standard>
-ClutterGstOverlay
 clutter_gst_overlay_get_type
 CLUTTER_GST_TYPE_OVERLAY
-ClutterGstOverlays
 clutter_gst_overlays_get_type
 CLUTTER_GST_TYPE_OVERLAYS
 </SECTION>

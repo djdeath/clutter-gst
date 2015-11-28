@@ -25,6 +25,11 @@
  * Boston, MA 02111-1307, USA.
  */
 
+/**
+ * SECTION:clutter-gst-types
+ * @short_description: Clutter-Gst common types.
+ */
+
 #include "clutter-gst-types.h"
 
 ClutterGstFrame *

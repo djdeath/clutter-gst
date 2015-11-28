@@ -75,6 +75,7 @@
 
   <chapter>
     <title>ClutterGst utils</title>
+    <xi:include href="xml/clutter-gst-types.xml"/>
     <xi:include href="xml/clutter-gst-util.xml"/>
     <xi:include href="xml/clutter-gst-version.xml"/>
   </chapter>

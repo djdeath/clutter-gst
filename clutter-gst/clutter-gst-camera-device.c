@@ -466,8 +466,8 @@ clutter_gst_camera_device_get_supported_resolutions (ClutterGstCameraDevice *dev
 /**
  * clutter_gst_camera_device_get_capture_resolution:
  * @device: a #ClutterGstCameraDevice
- * @width: Pointer to store the current capture resolution width
- * @height: Pointer to store the current capture resolution height
+ * @width: (out): Pointer to store the current capture resolution width
+ * @height: (out): Pointer to store the current capture resolution height
  *
  * Retrieve the current capture resolution being used by @device.
  */

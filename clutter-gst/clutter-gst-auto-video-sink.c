@@ -149,6 +149,7 @@ clutter_gst_auto_video_sink_clear_kid (ClutterGstAutoVideoSink3 *sink)
   if (sink->content)
     {
       clutter_gst_content_set_sink (CLUTTER_GST_CONTENT (sink->content), NULL);
+      g_clear_object (&sink->content);
     }
 }
 
@@ -210,7 +211,10 @@ clutter_gst_auto_video_sink_set_property (GObject      *object,
       break;
     case PROP_CONTENT:
       g_clear_object (&sink->content);
-      sink->content = g_value_get_object (value);
+      sink->content = g_value_dup_object (value);
+      if (sink->content && sink->kid)
+        clutter_gst_content_set_sink (CLUTTER_GST_CONTENT (sink->content),
+                                      CLUTTER_GST_VIDEO_SINK (sink->kid));
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);

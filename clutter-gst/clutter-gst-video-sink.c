@@ -1319,13 +1319,16 @@ clutter_gst_rgb32_upload_gl (ClutterGstVideoSink *sink,
 
   upload_meta = gst_buffer_get_video_gl_texture_upload_meta (buffer);
   if (!upload_meta) {
-    GST_WARNING ("Buffer does not support GLTextureUploadMeta API");
+    GST_WARNING_OBJECT (sink,
+                        "Buffer does not support GLTextureUploadMeta API");
     return FALSE;
   }
 
   if (upload_meta->n_textures != priv->renderer->n_layers ||
       upload_meta->texture_type[0] != GST_VIDEO_GL_TEXTURE_TYPE_RGBA) {
-    GST_WARNING ("clutter-gst-video-sink only supports gl upload in a single RGBA texture");
+    GST_WARNING_OBJECT (sink,
+                        "clutter-gst-video-sink only supports gl upload in a"
+                        " single RGBA texture");
     return FALSE;
   }
 
@@ -1338,7 +1341,7 @@ clutter_gst_rgb32_upload_gl (ClutterGstVideoSink *sink,
         cogl_texture_set_components (priv->frame[i], COGL_TEXTURE_COMPONENTS_RGBA);
 
         if (!cogl_texture_allocate (priv->frame[i], NULL)) {
-          GST_WARNING ("Couldn't allocate cogl texture");
+          GST_WARNING_OBJECT (sink, "Couldn't allocate cogl texture");
           return FALSE;
         }
       }
@@ -1360,12 +1363,12 @@ clutter_gst_rgb32_upload_gl (ClutterGstVideoSink *sink,
 
 
   if (!cogl_texture_get_gl_texture (priv->frame[0], &gl_handle[0], NULL)) {
-    GST_WARNING ("Couldn't get gl texture");
+    GST_WARNING_OBJECT (sink, "Couldn't get gl texture");
     return FALSE;
   }
 
   if (!gst_video_gl_texture_upload_meta_upload (upload_meta, gl_handle)) {
-    GST_WARNING ("GL texture upload failed");
+    GST_WARNING_OBJECT (sink, "GL texture upload failed");
     return FALSE;
   }
 
@@ -2336,7 +2339,7 @@ clutter_gst_video_sink_event (GstBaseSink * basesink, GstEvent * event)
     case GST_EVENT_FLUSH_START:
       g_mutex_lock (&gst_source->buffer_lock);
       if (gst_source->buffer) {
-        GST_DEBUG ("Freeing existing buffer %p", gst_source->buffer);
+        GST_DEBUG_OBJECT (sink, "Freeing existing buffer %p", gst_source->buffer);
         gst_buffer_unref (gst_source->buffer);
         gst_source->buffer = NULL;
       }

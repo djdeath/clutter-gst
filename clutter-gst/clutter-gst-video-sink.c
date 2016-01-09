@@ -77,6 +77,7 @@
 
 #include "config.h"
 
+#include <cogl/cogl.h>
 #include <gst/gst.h>
 #include <gst/gstvalue.h>
 #include <gst/video/navigation.h>
@@ -85,8 +86,14 @@
 #include <string.h>
 #include <math.h>
 
+#ifdef COGL_HAS_EGL_DMABUF_SUPPORT
+#include <cogl/cogl-texture-dmabuf-egl.h>
+#include <gst/allocators/gstdmabuf.h>
+#endif
+
 #include "clutter-gst-video-sink.h"
 #include "clutter-gst-private.h"
+
 
 GST_DEBUG_CATEGORY_STATIC (clutter_gst_video_sink_debug);
 #define GST_CAT_DEFAULT clutter_gst_video_sink_debug
@@ -118,6 +125,10 @@ static const char clutter_gst_video_sink_caps_str[] =
   MAKE_CAPS_COMPOSITON (GST_CAPS_FEATURE_META_GST_VIDEO_GL_TEXTURE_UPLOAD_META, "{ RGBA }")
   ";"
   MAKE_CAPS (GST_CAPS_FEATURE_META_GST_VIDEO_GL_TEXTURE_UPLOAD_META, "{ RGBA }")
+#endif
+#ifdef COGL_HAS_EGL_DMABUF_SUPPORT
+  ";"
+  MAKE_CAPS ("memory:" GST_ALLOCATOR_DMABUF, "{ RGBA }")
 #endif
   ";"
   MAKE_CAPS_COMPOSITON (GST_CAPS_FEATURE_MEMORY_SYSTEM_MEMORY, BASE_SINK_CAPS)
@@ -218,6 +229,8 @@ typedef struct _ClutterGstRenderer
                       GstBuffer *buffer);
   gboolean (*upload_gl) (ClutterGstVideoSink *sink,
                          GstBuffer *buffer);
+  gboolean (*upload_dmabuf) (ClutterGstVideoSink *sink,
+                             GstBuffer *buffer);
   void (*shutdown) (ClutterGstVideoSink *sink);
 } ClutterGstRenderer;
 
@@ -1072,6 +1085,12 @@ clutter_gst_dummy_upload_gl (ClutterGstVideoSink *sink, GstBuffer *buffer)
   return FALSE;
 }
 
+static gboolean
+clutter_gst_dummy_upload_dmabuf (ClutterGstVideoSink *sink, GstBuffer *buffer)
+{
+  return FALSE;
+}
+
 static void
 clutter_gst_dummy_shutdown (ClutterGstVideoSink *sink)
 {
@@ -1198,6 +1217,7 @@ static ClutterGstRenderer rgb24_glsl_renderer =
     clutter_gst_rgb24_glsl_setup_pipeline,
     clutter_gst_rgb24_upload,
     clutter_gst_dummy_upload_gl,
+    clutter_gst_dummy_upload_dmabuf,
     clutter_gst_dummy_shutdown,
   };
 
@@ -1212,6 +1232,7 @@ static ClutterGstRenderer rgb24_renderer =
     clutter_gst_rgb24_setup_pipeline,
     clutter_gst_rgb24_upload,
     clutter_gst_dummy_upload_gl,
+    clutter_gst_dummy_upload_dmabuf,
     clutter_gst_dummy_shutdown,
   };
 
@@ -1372,6 +1393,71 @@ clutter_gst_rgb32_upload_gl (ClutterGstVideoSink *sink,
   return TRUE;
 }
 
+#ifdef COGL_HAS_EGL_DMABUF_SUPPORT
+
+static CoglPixelFormat
+gst_format_to_cogl_pixel_format (GstVideoFormat gst_format)
+{
+  switch (gst_format) {
+  case GST_VIDEO_FORMAT_RGBA:
+    return COGL_PIXEL_FORMAT_RGBA_8888;
+  case GST_VIDEO_FORMAT_BGRA:
+    return COGL_PIXEL_FORMAT_BGRA_8888;
+  case GST_VIDEO_FORMAT_ARGB:
+    return COGL_PIXEL_FORMAT_ARGB_8888;
+  case GST_VIDEO_FORMAT_ABGR:
+    return COGL_PIXEL_FORMAT_ABGR_8888;
+  default:
+    return COGL_PIXEL_FORMAT_ANY;
+  }
+}
+
+static gboolean
+clutter_gst_rgb32_upload_dmabuf (ClutterGstVideoSink *sink,
+                                 GstBuffer *buffer)
+{
+  ClutterGstVideoSinkPrivate *priv = sink->priv;
+  GstVideoMeta *meta;
+  CoglError *internal_error = NULL;
+  CoglPixelFormat format;
+
+  meta = gst_buffer_get_video_meta (buffer);
+  if (meta == NULL)
+    {
+      GST_WARNING_OBJECT (sink, "Cannot get video meta information");
+      return FALSE;
+    }
+
+  format = gst_format_to_cogl_pixel_format (priv->info.finfo->format);
+  if (format == COGL_PIXEL_FORMAT_ANY)
+    {
+      GST_WARNING_OBJECT (sink, "Unsupported video format %s with dmabufs",
+                          gst_video_format_to_string (priv->info.finfo->format));
+      return FALSE;
+    }
+
+
+  clear_frame_textures (sink);
+
+  priv->frame[0] = COGL_TEXTURE (cogl_texture_2d_new_from_dmabuf (priv->ctx,
+                                                                  meta->width,
+                                                                  meta->height,
+                                                                  format,
+                                                                  meta->offset[0],
+                                                                  meta->stride[0],
+                                                                  gst_dmabuf_memory_get_fd (gst_buffer_peek_memory (buffer, 0)),
+                                                                  &internal_error));
+  if (priv->frame[0] == NULL) {
+    GST_WARNING_OBJECT (sink, "Cannot texture from dmabuf : %s",
+                        internal_error->message);
+    cogl_error_free (internal_error);
+    return FALSE;
+  }
+
+  return TRUE;
+}
+#endif
+
 static ClutterGstRenderer rgb32_glsl_renderer =
   {
     "RGB 32",
@@ -1383,12 +1469,22 @@ static ClutterGstRenderer rgb32_glsl_renderer =
                                 "RGBA")
                      ";"
 #endif
+#ifdef COGL_HAS_EGL_DMABUF_SUPPORT
+                     MAKE_CAPS ("memory:" GST_ALLOCATOR_DMABUF,
+                                "RGBA")
+                     ";"
+#endif
                      MAKE_CAPS (GST_CAPS_FEATURE_MEMORY_SYSTEM_MEMORY,
                                 "{ RGBA, BGRA, RGBx, BGRx }")),
     1, /* n_layers */
     clutter_gst_rgb32_glsl_setup_pipeline,
     clutter_gst_rgb32_upload,
     clutter_gst_rgb32_upload_gl,
+#ifdef COGL_HAS_EGL_DMABUF_SUPPORT
+    clutter_gst_rgb32_upload_dmabuf,
+#else
+    clutter_gst_dummy_upload_dmabuf,
+#endif
     clutter_gst_dummy_shutdown,
   };
 
@@ -1403,6 +1499,7 @@ static ClutterGstRenderer rgb32_renderer =
     clutter_gst_rgb32_setup_pipeline,
     clutter_gst_rgb32_upload,
     clutter_gst_dummy_upload_gl,
+    clutter_gst_dummy_upload_dmabuf,
     clutter_gst_dummy_shutdown,
   };
 
@@ -1552,6 +1649,7 @@ static ClutterGstRenderer yv12_glsl_renderer =
     clutter_gst_yv12_glsl_setup_pipeline,
     clutter_gst_yv12_upload,
     clutter_gst_dummy_upload_gl,
+    clutter_gst_dummy_upload_dmabuf,
     clutter_gst_dummy_shutdown,
   };
 
@@ -1566,6 +1664,7 @@ static ClutterGstRenderer i420_glsl_renderer =
     clutter_gst_yv12_glsl_setup_pipeline,
     clutter_gst_i420_upload,
     clutter_gst_dummy_upload_gl,
+    clutter_gst_dummy_upload_dmabuf,
     clutter_gst_dummy_shutdown,
   };
 
@@ -1650,6 +1749,7 @@ static ClutterGstRenderer ayuv_glsl_renderer =
     clutter_gst_ayuv_glsl_setup_pipeline,
     clutter_gst_ayuv_upload,
     clutter_gst_dummy_upload_gl,
+    clutter_gst_dummy_upload_dmabuf,
     clutter_gst_dummy_shutdown,
   };
 
@@ -1745,6 +1845,7 @@ static ClutterGstRenderer nv12_glsl_renderer =
     clutter_gst_nv12_glsl_setup_pipeline,
     clutter_gst_nv12_upload,
     clutter_gst_dummy_upload_gl,
+    clutter_gst_dummy_upload_dmabuf,
     clutter_gst_dummy_shutdown,
   };
 
@@ -2031,14 +2132,24 @@ clutter_gst_source_dispatch (GSource *source,
 
   if (buffer)
     {
+      gboolean uploaded = FALSE;
+
       if (gst_buffer_get_video_gl_texture_upload_meta (buffer) != NULL) {
         GST_DEBUG_OBJECT (gst_source->sink,
                           "Trying to upload buffer %p with GL using renderer %s",
                           buffer, priv->renderer->name);
-        if (!priv->renderer->upload_gl (gst_source->sink, buffer)) {
-          goto fail_upload;
-        }
-      } else {
+        uploaded = priv->renderer->upload_gl (gst_source->sink, buffer);
+      }
+
+      if (cogl_has_feature(priv->ctx, COGL_FEATURE_ID_TEXTURE_DMABUF) &&
+          gst_is_dmabuf_memory (gst_buffer_peek_memory (buffer, 0))) {
+                GST_DEBUG_OBJECT (gst_source->sink,
+                          "Trying to upload buffer %p with DMABuf using renderer %s",
+                          buffer, priv->renderer->name);
+        uploaded = priv->renderer->upload_dmabuf (gst_source->sink, buffer);
+      }
+
+      if (!uploaded) {
         GST_DEBUG_OBJECT (gst_source->sink,
                           "Trying to upload buffer %p with software using renderer %s",
                           buffer, priv->renderer->name);
@@ -2318,7 +2429,6 @@ clutter_gst_video_sink_propose_allocation (GstBaseSink *base_sink, GstQuery *que
   gst_query_add_allocation_meta (query,
                                  GST_VIDEO_META_API_TYPE, NULL);
 #ifdef HAVE_GL_TEXTURE_UPLOAD
-
   gst_query_add_allocation_meta (query,
                                  GST_VIDEO_GL_TEXTURE_UPLOAD_META_API_TYPE, NULL);
 #endif
@@ -2343,6 +2453,7 @@ clutter_gst_video_sink_event (GstBaseSink * basesink, GstEvent * event)
         gst_buffer_unref (gst_source->buffer);
         gst_source->buffer = NULL;
       }
+
       g_mutex_unlock (&gst_source->buffer_lock);
       break;
 

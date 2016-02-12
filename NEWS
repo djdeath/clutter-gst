@@ -1,3 +1,28 @@
+clutter-gst 3.0.16 (12/02/2016)
+===============================================================================
+
+List of changes
+
+ o Make gudev an optional dependency
+
+ o Bunch of documentation fixes
+
+ o Auto video sink memory leak fixes
+
+ o Auto video sink background now defaults to black
+
+ o Video sink caps RGBx/BGRx naming fix
+
+ o Video sink frame display fix on loaded systems
+
+ o Video sink cleanups on stop()
+
+Many Thanks to:
+
+   Chris Mayo
+   Gilles Dartiguelongue
+   Nicolas Dufresne
+
 clutter-gst 3.0.14 (10/10/2015)
 ===============================================================================
 
@@ -8,7 +33,6 @@ List of changes
  o Reduce color conversion shader's size
 
  o Fix crash with vaapi plugins when frame upload fails
-
 
 clutter-gst 3.0.12 (30/09/2015)
 ===============================================================================

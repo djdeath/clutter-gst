@@ -258,7 +258,10 @@ clutter_gst_auto_video_sink_change_state (GstElement     *element,
 
     if (!sink->content)
       {
-        ClutterActor *stage = clutter_stage_new ();
+        ClutterColor color = { 0, 0, 0, 0xff };
+        ClutterActor *stage = g_object_new (CLUTTER_TYPE_STAGE,
+                                            "background-color", &color,
+                                            NULL);
         ClutterActor *actor = clutter_actor_new ();
         sink->content = clutter_gst_aspectratio_new ();
 

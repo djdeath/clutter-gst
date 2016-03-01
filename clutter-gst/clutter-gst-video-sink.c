@@ -99,7 +99,7 @@ static gchar *nv12_to_rgba_shader =
     "uniform sampler2D utex;"
     "void main () {"
     "  vec2 coord = vec2(cogl_tex_coord_in[0]);"
-    "  float y = 1.1640625 * (texture2D (ytex, coord).x - 0.0625);"
+    "  float y = 1.1640625 * (texture2D (ytex, coord).a - 0.0625);"
     "  float uvr = int (texture2D (utex, coord).r * 32);"
     "  float uvg = int (texture2D (utex, coord).g * 64);"
     "  float uvb = int (texture2D (utex, coord).b * 32);"
@@ -121,9 +121,25 @@ static gchar *yv12_to_rgba_shader =
     "uniform sampler2D vtex;"
     "void main () {"
     "  vec2 coord = vec2(cogl_tex_coord_in[0]);"
-    "  float y = 1.1640625 * (texture2D (ytex, coord).g - 0.0625);"
-    "  float u = texture2D (utex, coord).g - 0.5;"
-    "  float v = texture2D (vtex, coord).g - 0.5;"
+    "  float y = 1.1640625 * (texture2D (ytex, coord).a - 0.0625);"
+    "  float v = texture2D (utex, coord).a - 0.5;"
+    "  float u = texture2D (vtex, coord).a - 0.5;"
+    "  vec4 color;"
+    "  color.r = y + 1.59765625 * v;"
+    "  color.g = y - 0.390625 * u - 0.8125 * v;"
+    "  color.b = y + 2.015625 * u;"
+    "  color.a = 1.0;"
+    "  cogl_color_out = color;}";
+
+static gchar *i420_to_rgba_shader =
+    "uniform sampler2D ytex;"
+    "uniform sampler2D utex;"
+    "uniform sampler2D vtex;"
+    "void main () {"
+    "  vec2 coord = vec2(cogl_tex_coord_in[0]);"
+    "  float y = 1.1640625 * (texture2D (ytex, coord).a - 0.0625);"
+    "  float u = texture2D (utex, coord).a - 0.5;"
+    "  float v = texture2D (vtex, coord).a - 0.5;"
     "  vec4 color;"
     "  color.r = y + 1.59765625 * v;"
     "  color.g = y - 0.390625 * u - 0.8125 * v;"
@@ -997,8 +1013,8 @@ clutter_gst_yv12_upload (ClutterGstVideoSink * sink, GstBuffer * buffer)
       cogl_texture_new_from_data (GST_VIDEO_FRAME_COMP_WIDTH (&frame, i),
       GST_VIDEO_FRAME_COMP_HEIGHT (&frame, i),
       CLUTTER_GST_TEXTURE_FLAGS,
-      COGL_PIXEL_FORMAT_G_8,
-      COGL_PIXEL_FORMAT_G_8,
+      COGL_PIXEL_FORMAT_A_8,
+      COGL_PIXEL_FORMAT_A_8,
       GST_VIDEO_FRAME_PLANE_STRIDE (&frame, i),
       GST_VIDEO_FRAME_PLANE_DATA (&frame, i));
   }
@@ -1056,8 +1072,8 @@ clutter_gst_nv12_upload (ClutterGstVideoSink * sink, GstBuffer * buffer)
     cogl_texture_new_from_data (GST_VIDEO_FRAME_COMP_WIDTH (&frame, 0),
     GST_VIDEO_FRAME_COMP_HEIGHT (&frame, 0),
     CLUTTER_GST_TEXTURE_FLAGS,
-    COGL_PIXEL_FORMAT_G_8,
-    COGL_PIXEL_FORMAT_G_8,
+    COGL_PIXEL_FORMAT_A_8,
+    COGL_PIXEL_FORMAT_A_8,
     GST_VIDEO_FRAME_PLANE_STRIDE (&frame, 0),
     GST_VIDEO_FRAME_PLANE_DATA (&frame, 0));
 
@@ -1153,7 +1169,7 @@ static ClutterGstRenderer yv12_fp_renderer = {
 static void
 clutter_gst_i420_glsl_init (ClutterGstVideoSink * sink)
 {
-  _create_template_material (sink, yv12_to_rgba_shader, TRUE, 3);
+  _create_template_material (sink, i420_to_rgba_shader, TRUE, 3);
 }
 
 static ClutterGstRenderer i420_glsl_renderer = {

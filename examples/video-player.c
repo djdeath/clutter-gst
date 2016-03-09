@@ -431,7 +431,7 @@ main (int argc, char *argv[])
   GstElement          *goomsource;
   GstIterator         *iter;
   ClutterActor        *stage;
-  ClutterColor         stage_color = { 0x00, 0x00, 0x00, 0x00 };
+  ClutterColor         stage_color = { 0x00, 0x00, 0x00, 0xff };
   ClutterColor         control_color1 = { 73, 74, 77, 0xee };
   ClutterColor         control_color2 = { 0xcc, 0xcc, 0xcc, 0xff };
   GError              *error = NULL;

@@ -1,9 +1,9 @@
 !!ARBfp1.0
-# cgc version 3.0.0016, build date Feb 10 2011
+# cgc version 3.1.0013, build date Apr 24 2012
 # command line args: -profile arbfp1
 # source file: I420.cg
 #vendor NVIDIA Corporation
-#version 3.0.0.16
+#version 3.1.0.13
 #profile arbfp1
 #program I420_main
 #semantic I420_main.IN
@@ -19,17 +19,17 @@ PARAM c[2] = { { 1.1640625, 0.0625, 2.015625, 0.5 },
 		{ 0.390625, 0.8125, 1.5976562 } };
 TEMP R0;
 TEMP R1;
-TEX R1.y, fragment.texcoord[0], texture[0], 2D;
-ADD R0.x, R1.y, -c[0].y;
-TEX R0.y, fragment.texcoord[0], texture[2], 2D;
-TEX R1.y, fragment.texcoord[0], texture[1], 2D;
+TEX R1.w, fragment.texcoord[0], texture[0], 2D;
+ADD R0.x, R1.w, -c[0].y;
+TEX R0.w, fragment.texcoord[0], texture[2], 2D;
+TEX R1.w, fragment.texcoord[0], texture[1], 2D;
 MUL R0.x, R0, c[0];
-ADD R0.w, R1.y, -c[0];
-MAD R0.z, R0.w, c[0], R0.x;
-ADD R0.y, R0, -c[0].w;
-MAD R0.w, -R0, c[1].x, R0.x;
-MAD R0.x, R0.y, c[1].z, R0;
-MAD R0.y, -R0, c[1], R0.w;
+ADD R0.y, R1.w, -c[0].w;
+MAD R0.z, R0.y, c[0], R0.x;
+MAD R0.y, -R0, c[1].x, R0.x;
+ADD R0.w, R0, -c[0];
+MAD R0.x, R0.w, c[1].z, R0;
+MAD R0.y, -R0.w, c[1], R0;
 MUL result.color.xyz, fragment.color.primary.w, R0;
 MOV result.color.w, fragment.color.primary;
 END

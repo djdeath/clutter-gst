@@ -39,9 +39,9 @@ YV12_output YV12_main (YV12_input IN)
 {
   YV12_output OUT;
 
-  float y = 1.1640625 * (tex2D (IN.Y_tex, IN.Y).g - 0.0625);
-  float u = tex2D (IN.U_tex, IN.Y).g - 0.5;
-  float v = tex2D (IN.V_tex, IN.Y).g - 0.5;
+  float y = 1.1640625 * (tex2D (IN.Y_tex, IN.Y).a - 0.0625);
+  float u = tex2D (IN.U_tex, IN.Y).a - 0.5;
+  float v = tex2D (IN.V_tex, IN.Y).a - 0.5;
 
   OUT.color.r = y + 1.59765625 * v;
   OUT.color.g = y - 0.390625 * u - 0.8125 * v;
@@ -51,4 +51,3 @@ YV12_output YV12_main (YV12_input IN)
 
   return OUT;
 }
-

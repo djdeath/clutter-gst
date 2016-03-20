@@ -1,3 +1,17 @@
+clutter-gst 3.0.18 (20/03/2016)
+===============================================================================
+
+List of changes
+
+ o More documentation fixes
+
+ o Set example video player background to opaque black
+
+Many Thanks to:
+
+   Chris Mayo
+   Jonny Lamb
+
 clutter-gst 3.0.16 (12/02/2016)
 ===============================================================================
 

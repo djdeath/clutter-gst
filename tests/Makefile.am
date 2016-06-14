@@ -8,8 +8,9 @@ noinst_PROGRAMS = 				\
 	test-video-texture-new-unref-loop	\
 	$(NULL)
 
-AM_CPPFLAGS = -I$(top_srcdir)      \
-		$(MAINTAINER_CFLAGS) \
+AM_CPPFLAGS = -I$(top_srcdir)                   \
+	      -I$(top_builddir)/clutter-gst     \
+		$(MAINTAINER_CFLAGS)            \
 		$(NULL)
 
 test_alpha_SOURCES = test-alpha.c

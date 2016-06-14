@@ -12,7 +12,10 @@ BUILT_SOURCES = #
 # glib-mkenums
 glib_enum_h = clutter-gst-enum-types.h
 glib_enum_c = clutter-gst-enum-types.c
-glib_enum_headers = $(source_h)
+glib_enum_headers =					\
+	$(addprefix $(srcdir)/, $(source_srcdir_h))	\
+	$(addprefix $(builddir)/, $(source_builddir_h))	\
+	$(NULL)
 include $(top_srcdir)/build/autotools/Makefile.am.enums
 
 # glib-genmarshal
@@ -20,37 +23,45 @@ glib_marshal_list = clutter-gst-marshal.list
 glib_marshal_prefix = _clutter_gst_marshal
 include $(top_srcdir)/build/autotools/Makefile.am.marshal
 
-source_h = 					\
-	$(srcdir)/clutter-gst.h			\
-	$(srcdir)/clutter-gst-types.h		\
-	$(srcdir)/clutter-gst-util.h		\
-	$(srcdir)/clutter-gst-version.h		\
-	$(srcdir)/clutter-gst-video-sink.h	\
-	$(srcdir)/clutter-gst-video-texture.h 	\
-	$(srcdir)/clutter-gst-player.h		\
+source_srcdir_h = 				\
+	clutter-gst.h				\
+	clutter-gst-types.h			\
+	clutter-gst-util.h			\
+	clutter-gst-video-sink.h		\
+	clutter-gst-video-texture.h 		\
+	clutter-gst-player.h			\
+	$(NULL)
+
+source_builddir_h = 				\
+	clutter-gst-version.h			\
 	$(NULL)
 
 source_priv_h =					\
-	$(srcdir)/clutter-gst-debug.h		\
-	$(srcdir)/clutter-gst-marshal.h		\
-	$(srcdir)/clutter-gst-private.h		\
+	clutter-gst-debug.h			\
+	clutter-gst-marshal.h			\
+	clutter-gst-private.h			\
 	$(NULL)
 
 source_c = 					\
-	$(srcdir)/clutter-gst-debug.c		\
-	$(srcdir)/clutter-gst-marshal.c		\
-	$(srcdir)/clutter-gst-player.c		\
-	$(srcdir)/clutter-gst-video-sink.c	\
-	$(srcdir)/clutter-gst-video-texture.c	\
-        $(srcdir)/clutter-gst-util.c		\
-	$(glib_enum_c)				\
+	clutter-gst-debug.c			\
+	clutter-gst-player.c			\
+	clutter-gst-video-sink.c		\
+	clutter-gst-video-texture.c		\
+	clutter-gst-util.c			\
+	$(NULL)
+
+source_priv_c =					\
+	clutter-gst-marshal.c			\
 	$(NULL)
 
 libclutter_gst_@CLUTTER_GST_MAJORMINOR@_la_SOURCES =	\
 	$(MARSHALFILES)  				\
+	$(source_priv_c)      				\
 	$(source_c)      				\
 	$(source_priv_h) 				\
-	$(source_h)					\
+	$(source_srcdir_h)				\
+	$(source_builddir_h)				\
+	$(glib_enum_c)					\
 	$(glib_enum_h)					\
 	$(NULL)
 
@@ -88,17 +99,20 @@ libclutter_gst_@CLUTTER_GST_MAJORMINOR@_la_LDFLAGS =	\
 	$(NULL)
 
 cluttergstheadersdir = $(includedir)/clutter-gst-@CLUTTER_GST_API_VERSION@/clutter-gst
-cluttergstheaders_HEADERS = $(source_h) $(glib_enum_h)
+cluttergstheaders_HEADERS = $(glib_enum_h)		\
+	$(addprefix $(srcdir)/, $(source_srcdir_h))	\
+	$(addprefix $(builddir)/, $(source_builddir_h))	\
+	$(NULL)
 
 #
 # GStreamer plugin
 #
 
 plugin_source_c = 				\
-	$(srcdir)/clutter-gst-plugin.c	\
-	$(srcdir)/clutter-gst-video-sink.c	\
-	$(srcdir)/clutter-gst-auto-video-sink.c	\
-	$(srcdir)/clutter-gst-auto-video-sink.h	\
+	clutter-gst-plugin.c			\
+	clutter-gst-video-sink.c		\
+	clutter-gst-auto-video-sink.c		\
+	clutter-gst-auto-video-sink.h		\
 	$(NULL)
 
 libgstclutter_la_SOURCES =	\
@@ -152,7 +166,7 @@ ClutterGst-@CLUTTER_GST_API_VERSION@.gir: $(INTROSPECTION_SCANNER) libclutter-gs
 		--pkg gstreamer-base-1.0 \
 		--pkg-export clutter-gst-@CLUTTER_GST_API_VERSION@ \
 		$(cluttergstheaders_HEADERS) \
-		$(source_c)
+		$(addprefix $(srcdir)/, $(source_c))
 
 BUILT_GIRSOURCES += ClutterGst-@CLUTTER_GST_API_VERSION@.gir
 

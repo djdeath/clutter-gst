@@ -67,17 +67,14 @@ libclutter_gst_@CLUTTER_GST_MAJORMINOR@_la_SOURCES =	\
 	$(glib_enum_h)					\
 	$(NULL)
 
-INCLUDES =					\
-	-I$(top_srcdir)				\
-	-I$(top_builddir)			\
-	$(NULL)
-
 AM_CPPFLAGS =					\
 	-DCLUTTER_GST_COMPILATION		\
 	-DG_DISABLE_SINGLE_INCLUDES		\
 	-DCOGL_ENABLE_EXPERIMENTAL_API		\
 	-DCLUTTER_ENABLE_EXPERIMENTAL_API	\
 	-DG_LOG_DOMAIN=\"Clutter-Gst\"		\
+	-I$(top_srcdir)				\
+	-I$(top_builddir)			\
 	$(NULL)
 
 AM_CFLAGS = 				\
@@ -142,8 +139,11 @@ ClutterGst-@CLUTTER_GST_API_VERSION@.gir: $(INTROSPECTION_SCANNER) libclutter-gs
 		GST_PLUGIN_SYSTEM_PATH_1_0="" GST_PLUGIN_PATH_1_0="" GST_REGISTRY_UPDATE=no DISPLAY="" \
 		$(INTROSPECTION_SCANNER) -v \
 		--namespace ClutterGst --nsversion=@CLUTTER_GST_API_VERSION@ \
-		$(INCLUDES) \
 		$(AM_CPPFLAGS) \
+		$(CLUTTER_GST_CFLAGS) \
+		$(GST_CFLAGS) \
+		$(GUDEV_CFLAGS)	\
+		$(HW_CFLAGS) \
 		-D GST_USE_UNSTABLE_API \
 		--quiet --warn-all \
 		--add-include-path=$(srcdir) --add-include=path=. \
@@ -162,7 +162,7 @@ ClutterGst-@CLUTTER_GST_API_VERSION@.gir: $(INTROSPECTION_SCANNER) libclutter-gs
 		--include=GstAudio-1.0 \
 		--add-include-path=`$(PKG_CONFIG) --variable=girdir gstreamer-pbutils-1.0` \
 		--include=GstPbutils-1.0 \
-		--add-init-section="gst_init(0, NULL);" \
+		--add-init-section="extern void gst_init (int *argc, char *argv[]); gst_init(0, NULL);" \
 		--library=libclutter-gst-@CLUTTER_GST_API_VERSION@.la \
 		--libtool="${LIBTOOL}" \
 		--output $@ \

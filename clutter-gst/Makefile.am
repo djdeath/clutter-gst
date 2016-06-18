@@ -155,7 +155,7 @@ ClutterGst-@CLUTTER_GST_API_VERSION@.gir: $(INTROSPECTION_SCANNER) libclutter-gs
 		--include=GstVideo-1.0 \
 		--add-include-path=`$(PKG_CONFIG) --variable=girdir gstreamer-audio-1.0` \
 		--include=GstAudio-1.0 \
-		--add-init-section="gst_init(0,NULL);" \
+		--add-init-section="extern void gst_init (int *argc, char *argv[]); gst_init(0,NULL);" \
 		--library=libclutter-gst-@CLUTTER_GST_API_VERSION@.la \
 		--libtool="${LIBTOOL}" \
 		--output $@ \

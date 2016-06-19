@@ -135,13 +135,9 @@ BUILT_GIRSOURCES =
 ClutterGst-@CLUTTER_GST_API_VERSION@.gir: $(INTROSPECTION_SCANNER) libclutter-gst-@CLUTTER_GST_API_VERSION@.la
 	$(QUIET_GEN) \
 		GST_PLUGIN_SYSTEM_PATH_1_0="" GST_PLUGIN_PATH_1_0="" GST_REGISTRY_UPDATE=no DISPLAY="" \
+		CPPFLAGS="$(CPPFLAGS)" CFLAGS="$(CFLAGS)" LDFLAGS="$(LDFLAGS)" CC="$(CC)" PKG_CONFIG="$(PKG_CONFIG)" DLLTOOL="$(DLLTOOL)" \
 		$(INTROSPECTION_SCANNER) -v \
 		--namespace ClutterGst --nsversion=@CLUTTER_GST_API_VERSION@ \
-		$(AM_CPPFLAGS) \ 
-		$(CLUTTER_GST_CFLAGS) \
-		$(GST_CFLAGS) \
-		$(HW_CFLAGS) \
-		-D GST_USE_UNSTABLE_API \
 		--quiet --warn-all \
 		--add-include-path=$(srcdir) --add-include=path=. \
 		--c-include="clutter-gst/clutter-gst.h" \
@@ -164,6 +160,13 @@ ClutterGst-@CLUTTER_GST_API_VERSION@.gir: $(INTROSPECTION_SCANNER) libclutter-gs
 		--pkg gstreamer-1.0 \
 		--pkg gstreamer-base-1.0 \
 		--pkg-export clutter-gst-@CLUTTER_GST_API_VERSION@ \
+		--cflags-begin \
+		$(AM_CPPFLAGS) \
+		$(CLUTTER_GST_CFLAGS) \
+		$(GST_CFLAGS) \
+		$(HW_CFLAGS) \
+		-DGST_USE_UNSTABLE_API \
+		--cflags-end \
 		$(cluttergstheaders_HEADERS) \
 		$(addprefix $(srcdir)/, $(source_c))
 

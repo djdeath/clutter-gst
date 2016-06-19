@@ -25,9 +25,7 @@ AC_CONFIG_AUX_DIR([build/autotools])
 AC_CONFIG_SRCDIR([clutter-gst/clutter-gst.h])
 AC_CONFIG_HEADERS([config.h])
 
-AM_INIT_AUTOMAKE([1.9 -Wno-portability foreign no-dist-gzip dist-xz tar-ustar])
-
-echo \#buildapi-variable-no-builddir >/dev/null
+AM_INIT_AUTOMAKE([1.14 -Wno-portability foreign no-dist-gzip dist-xz tar-ustar subdir-objects])
 
 CLUTTER_GST_MAJOR_VERSION=clutter_gst_major_version
 CLUTTER_GST_MINOR_VERSION=clutter_gst_minor_version
@@ -89,7 +87,7 @@ AC_SUBST(GSTREAMER_REQ_VERSION)
 
 dnl ========================================================================
 
-m4_ifdef([AM_SILENT_RULES],[AM_SILENT_RULES([yes])])
+AM_SILENT_RULES([yes])
 AS_AM_REALLY_SILENT
 
 dnl ========================================================================

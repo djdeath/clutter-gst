@@ -20,51 +20,45 @@ glib_marshal_list = clutter-gst-marshal.list
 glib_marshal_prefix = _clutter_gst_marshal
 include $(top_srcdir)/build/autotools/Makefile.am.marshal
 
-source_h = 					\
-	$(srcdir)/clutter-gst.h			\
-	$(srcdir)/clutter-gst-types.h		\
-	$(srcdir)/clutter-gst-util.h		\
-	$(builddir)/clutter-gst-version.h	\
-	$(srcdir)/clutter-gst-camera.h		\
-	$(srcdir)/clutter-gst-camera-manager.h	\
-	$(srcdir)/clutter-gst-camera-device.h	\
-	$(srcdir)/clutter-gst-playback.h	\
-	$(srcdir)/clutter-gst-player.h		\
-	$(srcdir)/clutter-gst-aspectratio.h	\
-	$(srcdir)/clutter-gst-crop.h		\
-	$(srcdir)/clutter-gst-content.h		\
-	$(srcdir)/clutter-gst-video-sink.h	\
+source_h = 				\
+	clutter-gst-types.h		\
+	clutter-gst-util.h		\
+	clutter-gst-camera.h		\
+	clutter-gst-camera-manager.h	\
+	clutter-gst-camera-device.h	\
+	clutter-gst-playback.h		\
+	clutter-gst-player.h		\
+	clutter-gst-aspectratio.h	\
+	clutter-gst-crop.h		\
+	clutter-gst-content.h		\
+	clutter-gst-video-sink.h	\
 	$(NULL)
 
-source_priv_h =					\
-	$(srcdir)/clutter-gst-debug.h		\
-	$(builddir)/clutter-gst-marshal.h	\
-	$(srcdir)/clutter-gst-private.h		\
+source_priv_h =				\
+	clutter-gst-debug.h		\
+	clutter-gst-private.h		\
 	$(NULL)
 
-source_c = 					\
-	$(srcdir)/clutter-gst-debug.c		\
-	$(srcdir)/clutter-gst-types.c		\
-	$(builddir)/clutter-gst-marshal.c	\
-	$(srcdir)/clutter-gst-player.c		\
-	$(srcdir)/clutter-gst-camera.c		\
-	$(srcdir)/clutter-gst-camera-manager.c	\
-	$(srcdir)/clutter-gst-camera-device.c	\
-	$(srcdir)/clutter-gst-playback.c	\
-	$(srcdir)/clutter-gst-util.c		\
-	$(srcdir)/clutter-gst-aspectratio.c	\
-	$(srcdir)/clutter-gst-crop.c		\
-	$(srcdir)/clutter-gst-content.c		\
-	$(srcdir)/clutter-gst-video-sink.c	\
-	$(glib_enum_c)				\
+source_c = 				\
+	clutter-gst-debug.c		\
+	clutter-gst-types.c		\
+	clutter-gst-player.c		\
+	clutter-gst-camera.c		\
+	clutter-gst-camera-manager.c	\
+	clutter-gst-camera-device.c	\
+	clutter-gst-playback.c		\
+	clutter-gst-util.c		\
+	clutter-gst-aspectratio.c	\
+	clutter-gst-crop.c		\
+	clutter-gst-content.c		\
+	clutter-gst-video-sink.c	\
 	$(NULL)
 
 libclutter_gst_@CLUTTER_GST_MAJORMINOR@_la_SOURCES =	\
-	$(MARSHALFILES)  				\
+	$(BUILT_SOURCES)				\
 	$(source_c)      				\
 	$(source_priv_h) 				\
 	$(source_h)					\
-	$(glib_enum_h)					\
 	$(NULL)
 
 AM_CPPFLAGS =					\
@@ -73,6 +67,7 @@ AM_CPPFLAGS =					\
 	-DCOGL_ENABLE_EXPERIMENTAL_API		\
 	-DCLUTTER_ENABLE_EXPERIMENTAL_API	\
 	-DG_LOG_DOMAIN=\"Clutter-Gst\"		\
+	-DCLUTTER_DISABLE_DEPRECATION_WARNINGS	\
 	-I$(top_srcdir)				\
 	-I$(top_builddir)			\
 	$(NULL)
@@ -98,16 +93,20 @@ libclutter_gst_@CLUTTER_GST_MAJORMINOR@_la_LDFLAGS =	\
 	$(NULL)
 
 cluttergstheadersdir = $(includedir)/clutter-gst-@CLUTTER_GST_API_VERSION@/clutter-gst
-cluttergstheaders_HEADERS = $(source_h) $(glib_enum_h)
+cluttergstheaders_HEADERS = 	\
+	$(source_h) 		\
+	clutter-gst.h		\
+	$(NULL)
+nodist_cluttergstheaders_HEADERS = $(glib_enum_h) clutter-gst-version.h
 
 #
 # GStreamer plugin
 #
 
-plugin_source_c = 				\
-	$(srcdir)/clutter-gst-plugin.c		\
-	$(srcdir)/clutter-gst-auto-video-sink.c	\
-	$(srcdir)/clutter-gst-auto-video-sink.h	\
+plugin_source_c = 			\
+	clutter-gst-plugin.c		\
+	clutter-gst-auto-video-sink.c	\
+	clutter-gst-auto-video-sink.h	\
 	$(NULL)
 
 libgstclutter_@CLUTTER_GST_MAJORMINOR@_la_SOURCES =	\
@@ -141,7 +140,8 @@ ClutterGst-@CLUTTER_GST_API_VERSION@.gir: $(INTROSPECTION_SCANNER) libclutter-gs
 		$(INTROSPECTION_SCANNER) -v \
 		--namespace ClutterGst --nsversion=@CLUTTER_GST_API_VERSION@ \
 		--quiet --warn-all \
-		--add-include-path=$(srcdir) --add-include=path=. \
+		--add-include-path=$(top_srcdir)/clutter-gst \
+		--add-include=path=$(top_builddir)/clutter-gst \
 		--c-include="clutter-gst/clutter-gst.h" \
 		--include=GObject-2.0 \
 		--include=Cogl-1.0 \
@@ -176,18 +176,18 @@ ClutterGst-@CLUTTER_GST_API_VERSION@.gir: $(INTROSPECTION_SCANNER) libclutter-gs
 		$(HW_CFLAGS) \
 		-DGST_USE_UNSTABLE_API \
 		--cflags-end \
-		$(cluttergstheaders_HEADERS) \
-		$(source_c)
+		$(addprefix $(srcdir)/, $(source_h)) \
+		$(addprefix $(srcdir)/, $(source_c))
 
 BUILT_GIRSOURCES += ClutterGst-@CLUTTER_GST_API_VERSION@.gir
 
 # INTROSPECTION_GIRDIR/INTROSPECTION_TYPELIBDIR aren't the right place to
 # install anything - we need to install inside our prefix.
 girdir = $(datadir)/gir-1.0
-gir_DATA = $(BUILT_GIRSOURCES)
+nodist_gir_DATA = $(BUILT_GIRSOURCES)
 
 typelibsdir = $(libdir)/girepository-1.0/
-typelibs_DATA = $(BUILT_GIRSOURCES:.gir=.typelib)
+nodist_typelibs_DATA = $(BUILT_GIRSOURCES:.gir=.typelib)
 
 %.typelib: %.gir $(INTROSPECTION_COMPILER)
 	$(QUIET_GEN)$(INTROSPECTION_COMPILER) \

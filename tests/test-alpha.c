@@ -54,15 +54,6 @@ static GOptionEntry options[] =
   { NULL }
 };
 
-static guint32
-parse_fourcc (const gchar *fourcc)
-{
-  if (strlen (fourcc) != 4)
-    return 0;
-
-  return GST_STR_FOURCC (fourcc);
-}
-
 int
 main (int argc, char *argv[])
 {

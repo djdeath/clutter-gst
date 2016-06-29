@@ -177,7 +177,8 @@ ClutterGst-@CLUTTER_GST_API_VERSION@.gir: $(INTROSPECTION_SCANNER) libclutter-gs
 		-DGST_USE_UNSTABLE_API \
 		--cflags-end \
 		$(addprefix $(srcdir)/, $(source_h)) \
-		$(addprefix $(srcdir)/, $(source_c))
+		$(addprefix $(srcdir)/, $(source_c)) \
+		$(nodist_cluttergstheaders_HEADERS)
 
 BUILT_GIRSOURCES += ClutterGst-@CLUTTER_GST_API_VERSION@.gir
 
